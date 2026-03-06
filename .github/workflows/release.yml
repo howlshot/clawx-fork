@@ -127,10 +127,25 @@ jobs:
           pnpm run build:vite && pnpm exec zx scripts/bundle-openclaw.mjs && pnpm exec electron-builder --mac --publish never
 
       # Windows specific steps
+      - name: Validate Windows signing secrets
+        if: matrix.platform == 'win'
+        shell: bash
+        env:
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+        run: |
+          if [[ -z "$WIN_CSC_LINK" || -z "$WIN_CSC_KEY_PASSWORD" ]]; then
+            echo "::error::Missing WIN_CSC_LINK and/or WIN_CSC_KEY_PASSWORD secret."
+            echo "Configure both repo secrets to produce signed Windows installers."
+            exit 1
+          fi
+
       - name: Build Windows
         if: matrix.platform == 'win'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: pnpm run build:vite && pnpm exec zx scripts/bundle-openclaw.mjs && pnpm exec electron-builder --win --publish never
 
       # Linux specific steps
