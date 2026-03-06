@@ -19,7 +19,17 @@ export default defineConfig({
           build: {
             outDir: 'dist-electron/main',
             rollupOptions: {
-              external: ['electron', 'electron-store', 'electron-updater', 'ws'],
+              external: [
+                'electron',
+                'electron-store',
+                'electron-updater',
+                'ws',
+                'openclaw',
+                /^openclaw\//,
+                'node-llama-cpp',
+                /^@node-llama-cpp\//,
+                'qrcode-terminal',
+              ],
             },
           },
         },

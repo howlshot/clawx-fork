@@ -27,6 +27,9 @@ const NODE_MODULES = path.join(ROOT, 'node_modules');
 // may not be set yet.
 function normWin(p) {
   if (process.platform !== 'win32') return p;
+  // Keep standard drive-letter absolute paths unchanged for fs.realpathSync
+  // compatibility on some Windows setups.
+  if (/^[A-Za-z]:\\/.test(p)) return p;
   if (p.startsWith('\\\\?\\')) return p;
   return '\\\\?\\' + p.replace(/\//g, '\\');
 }

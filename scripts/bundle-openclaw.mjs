@@ -25,6 +25,9 @@ const NODE_MODULES = path.join(ROOT, 'node_modules');
 // On Windows, pnpm virtual store paths can exceed MAX_PATH (260 chars).
 function normWin(p) {
   if (process.platform !== 'win32') return p;
+  // Keep standard drive-letter absolute paths unchanged for fs.realpathSync
+  // compatibility on some Windows setups.
+  if (/^[A-Za-z]:\\/.test(p)) return p;
   if (p.startsWith('\\\\?\\')) return p;
   return '\\\\?\\' + p.replace(/\//g, '\\');
 }
