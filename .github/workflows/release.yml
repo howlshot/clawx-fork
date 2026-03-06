@@ -46,8 +46,12 @@ jobs:
       - name: Run tests
         run: pnpm run test
 
-      - name: Audit production dependencies (high+)
+      - name: Audit production dependencies (high+, blocking)
         run: pnpm audit --prod --audit-level=high
+
+      - name: Audit full dependency graph (high+, non-blocking)
+        continue-on-error: true
+        run: pnpm audit --audit-level=high
 
   release:
     needs: preflight
