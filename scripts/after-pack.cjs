@@ -334,6 +334,38 @@ exports.default = async function afterPack(context) {
   // causing TypeError in Node.js 22+ ESM interop.
   patchBrokenModules(dest);
 
+  // 1.05 Create a lightweight proxy package at resources/node_modules/openclaw
+  // so runtime `require('openclaw/...')` from app.asar can resolve to
+  // resources/openclaw/dist/... without bundling full openclaw into app.asar.
+  try {
+    const { writeFileSync } = require('fs');
+    const proxyRoot = join(resourcesDir, 'node_modules', 'openclaw');
+    const proxyPluginSdkDir = join(proxyRoot, 'plugin-sdk');
+    mkdirSync(proxyPluginSdkDir, { recursive: true });
+
+    writeFileSync(join(proxyRoot, 'package.json'), JSON.stringify({
+      name: 'openclaw',
+      private: true,
+      main: 'index.js'
+    }, null, 2));
+
+    writeFileSync(
+      join(proxyRoot, 'index.js'),
+      "module.exports = require('../../openclaw/dist/entry.js');\n",
+      'utf8'
+    );
+
+    writeFileSync(
+      join(proxyPluginSdkDir, 'index.js'),
+      "module.exports = require('../../../openclaw/dist/plugin-sdk/index.js');\n",
+      'utf8'
+    );
+
+    console.log('[after-pack] ✅ Created openclaw runtime proxy package under resources/node_modules/openclaw');
+  } catch (e) {
+    console.warn('[after-pack] ⚠️ Failed to create openclaw runtime proxy package:', e?.message || e);
+  }
+
   // 1.1 Bundle OpenClaw plugins directly from node_modules into packaged resources.
   //     This is intentionally done in afterPack (not extraResources) because:
   //     - electron-builder silently skips extraResources entries whose source
