@@ -39,6 +39,15 @@
 
 **ClawX** bridges the gap between powerful AI agents and everyday users. Built on top of [OpenClaw](https://github.com/OpenClaw), it transforms command-line AI orchestration into an accessible, beautiful desktop experience—no terminal required.
 
+## Fork Security Posture
+
+This fork applies stricter release defaults for safer self-hosting:
+- Windows code signing is required for release builds.
+- Update signature verification is enabled on Windows.
+- Auto-update is restricted to this fork's GitHub Releases.
+
+See [SECURITY.md](SECURITY.md) for reporting and support policy.
+
 Whether you're automating workflows, managing AI-powered channels, or scheduling intelligent tasks, ClawX provides the interface you need to harness AI agents effectively.
 
 ClawX comes pre-configured with best-practice model providers and natively supports Windows as well as multi-language settings. Of course, you can also fine-tune advanced configurations via **Settings → Advanced → Developer Mode**.
