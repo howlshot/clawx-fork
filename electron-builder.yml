@@ -97,10 +97,11 @@ dmg:
 
 # Windows Configuration
 win:
-  # Hardened defaults: only distribute signed binaries and verify update signatures.
-  forceCodeSigning: true
-  verifyUpdateCodeSignature: true
-  signAndEditExecutable: true
+  # Temporary local test mode (unsigned build):
+  # keep this OFF only for internal evaluation builds.
+  forceCodeSigning: false
+  verifyUpdateCodeSignature: false
+  signAndEditExecutable: false
   extraResources:
     - from: resources/bin/win32-${arch}
       to: bin

@@ -28,6 +28,9 @@ const { join, dirname, basename } = require('path');
 // on Windows, which bypasses the limit unconditionally.
 function normWin(p) {
   if (process.platform !== 'win32') return p;
+  // Keep standard drive-letter absolute paths unchanged for fs APIs that
+  // can misbehave with forced \\?\ prefixes on some Windows setups.
+  if (/^[A-Za-z]:\\/.test(p)) return p;
   if (p.startsWith('\\\\?\\')) return p;
   return '\\\\?\\' + p.replace(/\//g, '\\');
 }
