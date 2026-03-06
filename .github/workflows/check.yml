@@ -6,6 +6,9 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
 
 jobs:
   check:
@@ -36,6 +39,9 @@ jobs:
 
       - name: Run tests
         run: pnpm run test
+
+      - name: Audit production dependencies (high+)
+        run: pnpm audit --prod --audit-level=high
 
   build:
     runs-on: windows-latest
