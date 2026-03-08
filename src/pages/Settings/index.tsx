@@ -65,7 +65,13 @@ export function Settings() {
     setDevModeUnlocked,
   } = useSettingsStore();
 
-  const { status: gatewayStatus, restart: restartGateway } = useGatewayStore();
+  const {
+    status: gatewayStatus,
+    lastError: gatewayLastError,
+    restart: restartGateway,
+    recover: recoverGateway,
+    relaunchApp,
+  } = useGatewayStore();
   const currentVersion = useUpdateStore((state) => state.currentVersion);
   const updateSetAutoDownload = useUpdateStore((state) => state.setAutoDownload);
   const [controlUiInfo, setControlUiInfo] = useState<ControlUiInfo | null>(null);
@@ -350,7 +356,7 @@ export function Settings() {
                 {t('gateway.port')}: {gatewayStatus.port}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-end">
               <Badge
                 variant={
                   gatewayStatus.state === 'running'
@@ -366,12 +372,27 @@ export function Settings() {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 {t('common:actions.restart')}
               </Button>
+              <Button variant="default" size="sm" onClick={recoverGateway}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Recover
+              </Button>
+              <Button variant="outline" size="sm" onClick={relaunchApp}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Relaunch App
+              </Button>
               <Button variant="outline" size="sm" onClick={handleShowLogs}>
                 <FileText className="h-4 w-4 mr-2" />
                 {t('gateway.logs')}
               </Button>
             </div>
           </div>
+
+          {gatewayLastError && (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+              <p className="font-medium mb-1">Gateway recovery error</p>
+              <p className="break-words">{gatewayLastError}</p>
+            </div>
+          )}
 
           {showLogs && (
             <div className="mt-4 p-4 rounded-lg bg-black/10 dark:bg-black/40 border border-border">

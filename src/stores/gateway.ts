@@ -24,6 +24,8 @@ interface GatewayState {
   start: () => Promise<void>;
   stop: () => Promise<void>;
   restart: () => Promise<void>;
+  recover: () => Promise<void>;
+  relaunchApp: () => Promise<void>;
   checkHealth: () => Promise<GatewayHealth>;
   rpc: <T>(method: string, params?: unknown, timeoutMs?: number) => Promise<T>;
   setStatus: (status: GatewayStatus) => void;
@@ -233,13 +235,65 @@ export const useGatewayStore = create<GatewayState>((set, get) => ({
           status: { ...get().status, state: 'error', error: result.error },
           lastError: result.error || 'Failed to restart Gateway'
         });
+        return;
       }
+
+      const refreshedStatus = await window.electron.ipcRenderer.invoke('gateway:status') as GatewayStatus;
+      set({ status: refreshedStatus, lastError: null });
     } catch (error) {
       set({
         status: { ...get().status, state: 'error', error: String(error) },
         lastError: String(error)
       });
     }
+  },
+
+  recover: async () => {
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    try {
+      set({ status: { ...get().status, state: 'starting' }, lastError: null });
+
+      // Attempt 1: normal restart
+      const restartResult = await window.electron.ipcRenderer.invoke('gateway:restart') as { success: boolean; error?: string };
+      if (restartResult.success) {
+        await sleep(1200);
+        const refreshedStatus = await window.electron.ipcRenderer.invoke('gateway:status') as GatewayStatus;
+        set({ status: refreshedStatus, lastError: null });
+        if (refreshedStatus.state === 'running') return;
+      }
+
+      // Attempt 2: explicit stop -> start sequence
+      await window.electron.ipcRenderer.invoke('gateway:stop');
+      await sleep(1000);
+      let startResult: { success: boolean; error?: string } | undefined;
+      startResult = await window.electron.ipcRenderer.invoke('gateway:start') as { success: boolean; error?: string };
+      if (startResult.success) {
+        await sleep(1500);
+        const refreshedStatus = await window.electron.ipcRenderer.invoke('gateway:status') as GatewayStatus;
+        set({ status: refreshedStatus, lastError: null });
+        if (refreshedStatus.state === 'running') return;
+      }
+
+      const failureMessage = [restartResult?.error, (typeof startResult !== 'undefined' ? startResult.error : undefined)]
+        .filter(Boolean)
+        .join(' | ') || 'Gateway recovery failed';
+
+      set({
+        status: { ...get().status, state: 'error', error: failureMessage },
+        lastError: failureMessage,
+      });
+    } catch (error) {
+      const message = String(error);
+      set({
+        status: { ...get().status, state: 'error', error: message },
+        lastError: message,
+      });
+    }
+  },
+
+  relaunchApp: async () => {
+    await window.electron.ipcRenderer.invoke('app:relaunch');
   },
 
   checkHealth: async () => {
