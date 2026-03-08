@@ -33,6 +33,7 @@ import { useChannelsStore } from '@/stores/channels';
 import { useGatewayStore } from '@/stores/gateway';
 import { StatusBadge, type Status } from '@/components/common/StatusBadge';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { GatewayRecoveryBanner } from '@/components/common/GatewayRecoveryBanner';
 import {
   CHANNEL_ICONS,
   CHANNEL_NAMES,
@@ -174,14 +175,17 @@ export function Channels() {
 
       {/* Gateway Warning */}
       {gatewayStatus.state !== 'running' && (
-        <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10">
-          <CardContent className="py-4 flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 text-yellow-500" />
-            <span className="text-yellow-700 dark:text-yellow-400">
-              {t('gatewayWarning')}
-            </span>
-          </CardContent>
-        </Card>
+        <div className="space-y-3">
+          <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-900/10">
+            <CardContent className="py-4 flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-yellow-500" />
+              <span className="text-yellow-700 dark:text-yellow-400">
+                {t('gatewayWarning')}
+              </span>
+            </CardContent>
+          </Card>
+          <GatewayRecoveryBanner compact />
+        </div>
       )}
 
       {/* Error Display */}

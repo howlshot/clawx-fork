@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useChatStore, type RawMessage } from '@/stores/chat';
 import { useGatewayStore } from '@/stores/gateway';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { GatewayRecoveryBanner } from '@/components/common/GatewayRecoveryBanner';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { ChatToolbar } from './ChatToolbar';
@@ -80,12 +81,17 @@ export function Chat() {
   // Gateway not running
   if (!isGatewayRunning) {
     return (
-      <div className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center text-center p-8">
-        <AlertCircle className="h-12 w-12 text-yellow-500 mb-4" />
-        <h2 className="text-xl font-semibold mb-2">{t('gatewayNotRunning')}</h2>
-        <p className="text-muted-foreground max-w-md">
-          {t('gatewayRequired')}
-        </p>
+      <div className="flex h-[calc(100vh-8rem)] flex-col justify-center p-8">
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 text-center">
+          <div>
+            <AlertCircle className="h-12 w-12 text-yellow-500 mb-4 mx-auto" />
+            <h2 className="text-xl font-semibold mb-2">{t('gatewayNotRunning')}</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              {t('gatewayRequired')}
+            </p>
+          </div>
+          <GatewayRecoveryBanner />
+        </div>
       </div>
     );
   }
